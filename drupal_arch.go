@@ -28,6 +28,7 @@ func main() {
 
 	var contentTypes []string
 	var taxonomies []string
+	var views []string
 
 	// Walk the read_dir and check each file to see if it belongs in one of our slices.
 	filepath.Walk(*read_dir, func(path string, file os.FileInfo, _ error) error {
@@ -47,12 +48,21 @@ func main() {
 			} else {
 				checkError(err)
 			}
+
+			// Any file that begins with "views.view" is a view definition.
+			r, err = regexp.MatchString("views.view*", file.Name())
+			if err == nil && r {
+				views = append(views, file.Name())
+			} else {
+				checkError(err)
+			}
 		}
 		return nil
 	})
 
 	handleContentTypes(contentTypes)
 	handleTaxonomies(taxonomies)
+	handleViews(views)
 
 }
 
@@ -82,7 +92,7 @@ func handleContentTypes(contentTypes []string) {
 	}
 }
 
-// Do all the work to write out the content_types csv
+// Do all the work to write out the taxonomies csv
 func handleTaxonomies(taxonomies []string) {
 	var header = []string{"Type", "Name", "Description"}
 
@@ -102,6 +112,32 @@ func handleTaxonomies(taxonomies []string) {
 		configData := getConfigData(fileName)
 
 		record := []string{configData["vid"].(string), configData["name"].(string), configData["description"].(string)}
+
+		err = writer.Write(record)
+		checkError(err)
+	}
+}
+
+// Do all the work to write out the taxonomies csv
+func handleViews(views []string) {
+	var header = []string{"Label", "Description"}
+
+	file, err := os.Create(*write_dir + "/views.csv")
+	checkError(err)
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	err = writer.Write(header)
+	checkError(err)
+
+	// Parse content type files and create array of records
+	for _, file := range views {
+		fileName := *read_dir + "/" + file
+		configData := getConfigData(fileName)
+
+		record := []string{configData["label"].(string), configData["description"].(string)}
 
 		err = writer.Write(record)
 		checkError(err)
