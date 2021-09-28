@@ -134,6 +134,7 @@ func getConfigData(file string) map[string]interface{} {
 	return configData
 }
 
+// Simple and dumb error handler
 func checkError(err error) {
 	if err != nil {
 		fmt.Println(err)
@@ -141,6 +142,7 @@ func checkError(err error) {
 	}
 }
 
+// Given a regular expression, return a slice containing the files that match in readDir.
 func filterDirectoryList(regex string) []string {
 	var results []string
 
