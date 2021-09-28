@@ -30,40 +30,13 @@ func main() {
 	var taxonomies []string
 	var views []string
 
-	// Walk the read_dir and check each file to see if it belongs in one of our slices.
-	filepath.Walk(*read_dir, func(path string, file os.FileInfo, _ error) error {
-		if !file.IsDir() {
-			// Any file that begins with "node.type" is a content type definition.
-			r, err := regexp.MatchString("node.type*", file.Name())
-			if err == nil && r {
-				contentTypes = append(contentTypes, file.Name())
-			} else {
-				checkError(err)
-			}
-
-			// Any file that begins with "taxonomy.vocabulary" is a taxonomy definition.
-			r, err = regexp.MatchString("taxonomy.vocabulary*", file.Name())
-			if err == nil && r {
-				taxonomies = append(taxonomies, file.Name())
-			} else {
-				checkError(err)
-			}
-
-			// Any file that begins with "views.view" is a view definition.
-			r, err = regexp.MatchString("views.view*", file.Name())
-			if err == nil && r {
-				views = append(views, file.Name())
-			} else {
-				checkError(err)
-			}
-		}
-		return nil
-	})
+	contentTypes = filterDirectoryList("node.type*")
+	taxonomies = filterDirectoryList("taxonomy.vocabulary*")
+	views = filterDirectoryList("views.view*")
 
 	handleContentTypes(contentTypes)
 	handleTaxonomies(taxonomies)
 	handleViews(views)
-
 }
 
 // Do all the work to write out the content_types csv
@@ -166,4 +139,23 @@ func checkError(err error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func filterDirectoryList(regex string) []string {
+	var results []string
+
+	// Walk the read_dir and check each file to see if it belongs in one of our slices.
+	filepath.Walk(*read_dir, func(path string, file os.FileInfo, _ error) error {
+		if !file.IsDir() {
+			r, err := regexp.MatchString(regex, file.Name())
+			if err == nil && r {
+				results = append(results, file.Name())
+			} else {
+				checkError(err)
+			}
+		}
+		return nil
+	})
+
+	return results
 }
