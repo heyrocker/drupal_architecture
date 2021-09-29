@@ -41,23 +41,25 @@ func main() {
 
 // Do all the work to write out the content_types csv
 func handleContentTypes(contentTypes []string) {
+	// Header row for the CSV
 	var header = []string{"Type", "Name", "Description"}
 
+	// Create the file
 	file, err := os.Create(*write_dir + "/content_types.csv")
 	checkError(err)
 	defer file.Close()
 
+	// Open it for writing
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
+	// Write the header
 	err = writer.Write(header)
 	checkError(err)
 
-	// Parse content type files and create array of records
+	// Iterate content types array
 	for _, file := range contentTypes {
-		fileName := *read_dir + "/" + file
-		configData := getConfigData(fileName)
-
+		configData := getConfigData(*read_dir + "/" + file)
 		record := []string{configData["type"].(string), configData["name"].(string), configData["description"].(string)}
 
 		err = writer.Write(record)
@@ -81,8 +83,7 @@ func handleTaxonomies(taxonomies []string) {
 
 	// Parse content type files and create array of records
 	for _, file := range taxonomies {
-		fileName := *read_dir + "/" + file
-		configData := getConfigData(fileName)
+		configData := getConfigData(*read_dir + "/" + file)
 
 		record := []string{configData["vid"].(string), configData["name"].(string), configData["description"].(string)}
 
@@ -107,8 +108,7 @@ func handleViews(views []string) {
 
 	// Parse content type files and create array of records
 	for _, file := range views {
-		fileName := *read_dir + "/" + file
-		configData := getConfigData(fileName)
+		configData := getConfigData(*read_dir + "/" + file)
 
 		record := []string{configData["label"].(string), configData["description"].(string)}
 
