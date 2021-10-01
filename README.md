@@ -9,7 +9,7 @@ Drupal Architecture is written in Go. If you are using a 64-bit version of OSX, 
 ```shell
 drupal_architecture --read_dir --write_dir
 ```
-- `--read_dir ", "Full path to the directory containing your Drupal config files. Do not include trailing slash. Defaults to current directory.` 
+- `--read_dir` "Full path to the directory containing your Drupal config files. Do not include trailing slash. Defaults to current directory.` 
 - `--write_dir` "Full path to the directory where to write CSVs. Do not include trailing slash. Defaults to current directory"
 
 ## Output
@@ -35,7 +35,7 @@ A listing of all the views in the Drupal installation. Contains the following fi
 - Label (Name of this view)
 - Description (Description of this view)
 
-### content_type_<name>.csv
+### content_type_[name].csv
 A listing of all the fields in a specific content type, as well as their properties.
 
 - Label (Name of this field)
