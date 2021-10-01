@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 var write_dir *string
@@ -43,6 +44,9 @@ func main() {
 func handleContentTypes(contentTypes []string) {
 	// Header row for the CSV
 	var header = []string{"Type", "Name", "Description"}
+	var typeHeader = []string{"Label", "Machine Name", "Type", "Description", "Required", "Cardinality", "Translatable"}
+	var fields []string
+	var fieldName string
 
 	// Create the file
 	file, err := os.Create(*write_dir + "/content_types.csv")
@@ -58,12 +62,54 @@ func handleContentTypes(contentTypes []string) {
 	checkError(err)
 
 	// Iterate content types array
-	for _, file := range contentTypes {
-		configData := getConfigData(*read_dir + "/" + file)
+	for _, contentTypeFile := range contentTypes {
+		// Write a record to the main content types file for this content type
+		configData := getConfigData(*read_dir + "/" + contentTypeFile)
 		record := []string{configData["type"].(string), configData["name"].(string), configData["description"].(string)}
-
 		err = writer.Write(record)
 		checkError(err)
+
+		// Extract the actual content type machine name from the file name
+		parts := strings.Split(contentTypeFile, ".")
+		contentTypeName := parts[2]
+
+		// Create the type-specific file
+		typeFile, err := os.Create(*write_dir + "/content_type_" + contentTypeName + ".csv")
+		checkError(err)
+		defer typeFile.Close()
+
+		// Open it for writing
+		typeWriter := csv.NewWriter(typeFile)
+		defer typeWriter.Flush()
+
+		// Write the header
+		err = typeWriter.Write(typeHeader)
+		checkError(err)
+
+		// Find the fields for this content type
+		fields = filterDirectoryList("field.field.node." + contentTypeName + "*")
+		for _, field := range fields {
+			// Extract the actual field machine name from the file name
+			parts = strings.Split(field, ".")
+			fieldName = parts[4]
+
+			// Get the content-type-specific config data from this field
+			typeData := getConfigData(*read_dir + "/" + field)
+
+			// Get the storage-specific config data for this field
+			storageData := getConfigData(*read_dir + "/" + "field.storage.node." + fieldName + ".yml")
+
+			// Cardinality -1 = Unlimited
+			cardinality := fmt.Sprintf("%v", storageData["cardinality"])
+			if cardinality == "-1" {
+				cardinality = "Unlimited"
+			}
+
+			// Write the row
+			record := []string{typeData["label"].(string), fieldName, storageData["type"].(string), typeData["description"].(string), fmt.Sprintf("%v", typeData["required"]), cardinality, fmt.Sprintf("%v", typeData["translatable"])}
+			err = typeWriter.Write(record)
+			checkError(err)
+		}
 	}
 }
 
