@@ -31,9 +31,9 @@ func main() {
 	var taxonomies []string
 	var views []string
 
-	contentTypes = filterDirectoryList("node.type*")
-	taxonomies = filterDirectoryList("taxonomy.vocabulary*")
-	views = filterDirectoryList("views.view*")
+	contentTypes = filterDirectoryList("node\\.type*")
+	taxonomies = filterDirectoryList("taxonomy\\.vocabulary*")
+	views = filterDirectoryList("views\\.view*")
 
 	handleContentTypes(contentTypes)
 	handleTaxonomies(taxonomies)
