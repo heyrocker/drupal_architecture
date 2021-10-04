@@ -43,7 +43,7 @@ func main() {
 // Do all the work to write out the content_types csv
 func handleContentTypes(contentTypes []string) {
 	// Header row for the CSV
-	var header = []string{"Type", "Name", "Description"}
+	var header = []string{"Name", "Type", "Description"}
 	var typeHeader = []string{"Label", "Machine Name", "Type", "Description", "Required", "Cardinality", "Translatable"}
 	var fields []string
 	var fieldName string
@@ -65,7 +65,7 @@ func handleContentTypes(contentTypes []string) {
 	for _, contentTypeFile := range contentTypes {
 		// Write a record to the main content types file for this content type
 		configData := getConfigData(*read_dir + "/" + contentTypeFile)
-		record := []string{configData["type"].(string), configData["name"].(string), configData["description"].(string)}
+		record := []string{configData["name"].(string), configData["type"].(string), configData["description"].(string)}
 		err = writer.Write(record)
 		checkError(err)
 
