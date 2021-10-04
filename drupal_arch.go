@@ -44,7 +44,7 @@ func main() {
 func handleContentTypes(contentTypes []string) {
 	// Header row for the CSV
 	var header = []string{"Name", "Type", "Description"}
-	var typeHeader = []string{"Label", "Machine Name", "Type", "Description", "Required", "Cardinality", "Translatable"}
+	var typeHeader = []string{"Label", "Machine Name", "Type", "Description", "Required", "Default Value", "Cardinality", "Translatable"}
 	var fields []string
 	var fieldName string
 
@@ -106,7 +106,7 @@ func handleContentTypes(contentTypes []string) {
 			}
 
 			// Write the row
-			record := []string{typeData["label"].(string), fieldName, storageData["type"].(string), typeData["description"].(string), fmt.Sprintf("%v", typeData["required"]), cardinality, fmt.Sprintf("%v", typeData["translatable"])}
+			record := []string{typeData["label"].(string), fieldName, storageData["type"].(string), typeData["description"].(string), fmt.Sprintf("%v", typeData["required"]), fmt.Sprintf("%v", typeData["default_value"]), cardinality, fmt.Sprintf("%v", typeData["translatable"])}
 			err = typeWriter.Write(record)
 			checkError(err)
 		}
