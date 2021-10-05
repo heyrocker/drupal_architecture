@@ -76,7 +76,7 @@ Probably! Send me your ideas, although as things stand, I have got what I need i
 ### This code is terrible! Its like you’ve never written Go before!
 I know! I haven’t! And yet it works! Amazing!
 
-## Can I file a bug report? 
+### Can I file a bug report? 
 Sure! A pull request is even better! I have not done a ton of testing as I only have so many sets of config available to me. If you are experiencing a problem, please include your config with your bug report so I can test it.
 
 ### Can I write this as a Drupal module / Drush plugin?
