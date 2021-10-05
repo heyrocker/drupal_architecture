@@ -43,9 +43,41 @@ A listing of all the fields in a specific content type, as well as their propert
 - Type (Field type of this field (text, entity reference, etc.))
 - Description (Description of this field)
 - Required (Is this field required?)
+- Default Value (Is there a default value for this field?)
 - Cardinality (Can there be more than one instance of this field?)
 - Translatable (Is this field translatable?)
 
+## paragraphs.csv
+A listing of all the paragraphs in the Drupal installation. Contains the following fields
 
+- Type (Name of this content type)
+- Name (Machine name of this content type)
+- Description (Description of this content type)
 
+### paragraph_[name].csv
+A listing of all the fields in a specific paragraph type, as well as their properties.
 
+- Label (Name of this field)
+- Machine Name (Machine name of this field)
+- Type (Field type of this field (text, entity reference, etc.))
+- Description (Description of this field)
+- Required (Is this field required?)
+- Default Value (Is there a default value for this field?)
+- Cardinality (Can there be more than one instance of this field?)
+- Translatable (Is this field translatable?)
+
+## FAQ
+### Why didn’t you write this as a Drupal module / Drush plugin?
+The great thing about this utility as it stands now is that it doesn’t require a running Drupal site. You have a pile of config files and run it and you’re off. If I was going to write this as a Drupal module it would have most likely taken me longer to get a running development environment than it did to write the utility, and that is despite the fact that I had never written any Go before.
+
+### Can you include [some other listings of things]
+Probably! Send me your ideas, although as things stand, I have got what I need included.
+
+### This code is terrible! Its like you’ve never written Go before!
+I know! I haven’t! And yet it works! Amazing!
+
+## Can I file a bug report? 
+Sure! A pull request is even better! I have not done a ton of testing as I only have so many sets of config available to me. If you are experiencing a problem, please include your config with your bug report so I can test it.
+
+### Can I write this as a Drupal module / Drush plugin?
+Sure! Go crazy! That would be super useful for the community!
