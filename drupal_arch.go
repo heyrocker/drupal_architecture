@@ -30,17 +30,20 @@ func main() {
 	var contentTypes []string
 	var taxonomies []string
 	var views []string
+	var paragraphs []string
 
 	contentTypes = filterDirectoryList("node\\.type*")
 	taxonomies = filterDirectoryList("taxonomy\\.vocabulary*")
 	views = filterDirectoryList("views\\.view*")
+	paragraphs = filterDirectoryList("paragraphs\\.paragraphs_type*")
 
 	handleContentTypes(contentTypes)
+	handleParagraphs(paragraphs)
 	handleTaxonomies(taxonomies)
 	handleViews(views)
 }
 
-// Do all the work to write out the content_types csv
+// Do all the work to write out the content_types csv and the individual content types
 func handleContentTypes(contentTypes []string) {
 	// Header row for the CSV
 	var header = []string{"Name", "Type", "Description"}
@@ -113,6 +116,79 @@ func handleContentTypes(contentTypes []string) {
 	}
 }
 
+// Do all the work to write out the paragraphs csv and the individual paragraphs types
+func handleParagraphs(paragraphs []string) {
+	// Header row for the CSV
+	var header = []string{"Name", "Type", "Description"}
+	var typeHeader = []string{"Label", "Machine Name", "Type", "Description", "Required", "Default Value", "Cardinality", "Translatable"}
+	var fields []string
+	var fieldName string
+
+	// Create the file
+	file, err := os.Create(*write_dir + "/paragraphs_types.csv")
+	checkError(err)
+	defer file.Close()
+
+	// Open it for writing
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Write the header
+	err = writer.Write(header)
+	checkError(err)
+
+	// Iterate content types array
+	for _, paragraphFile := range paragraphs {
+		// Write a record to the main content types file for this content type
+		configData := getConfigData(*read_dir + "/" + paragraphFile)
+		record := []string{configData["label"].(string), configData["id"].(string), fmt.Sprintf("%v", configData["description"])}
+		err = writer.Write(record)
+		checkError(err)
+
+		// Extract the actual content type machine name from the file name
+		parts := strings.Split(paragraphFile, ".")
+		paragraphName := parts[2]
+
+		// Create the type-specific file
+		typeFile, err := os.Create(*write_dir + "/paragraph_" + paragraphName + ".csv")
+		checkError(err)
+		defer typeFile.Close()
+
+		// Open it for writing
+		typeWriter := csv.NewWriter(typeFile)
+		defer typeWriter.Flush()
+
+		// Write the header
+		err = typeWriter.Write(typeHeader)
+		checkError(err)
+
+		// Find the fields for this content type
+		fields = filterDirectoryList("field.field.paragraph." + paragraphName + "*")
+		for _, field := range fields {
+			// Extract the actual field machine name from the file name
+			parts = strings.Split(field, ".")
+			fieldName = parts[4]
+
+			// Get the content-type-specific config data from this field
+			typeData := getConfigData(*read_dir + "/" + field)
+
+			// Get the storage-specific config data for this field
+			storageData := getConfigData(*read_dir + "/" + "field.storage.paragraph." + fieldName + ".yml")
+
+			// Cardinality -1 = Unlimited
+			cardinality := fmt.Sprintf("%v", storageData["cardinality"])
+			if cardinality == "-1" {
+				cardinality = "Unlimited"
+			}
+
+			// Write the row
+			record := []string{typeData["label"].(string), fieldName, storageData["type"].(string), typeData["description"].(string), fmt.Sprintf("%v", typeData["required"]), fmt.Sprintf("%v", typeData["default_value"]), cardinality, fmt.Sprintf("%v", typeData["translatable"])}
+			err = typeWriter.Write(record)
+			checkError(err)
+		}
+	}
+}
+
 // Do all the work to write out the taxonomies csv
 func handleTaxonomies(taxonomies []string) {
 	var header = []string{"Type", "Name", "Description"}
@@ -138,7 +214,7 @@ func handleTaxonomies(taxonomies []string) {
 	}
 }
 
-// Do all the work to write out the taxonomies csv
+// Do all the work to write out the views csv
 func handleViews(views []string) {
 	var header = []string{"Label", "Description"}
 
