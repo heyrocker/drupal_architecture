@@ -15,6 +15,7 @@ import (
 
 var write_dir *string
 var read_dir *string
+var mermaid []string
 
 func main() {
 	help := flag.String("help", "", "This listing.")
@@ -37,7 +38,12 @@ func main() {
 	views = filterDirectoryList("views\\.view*")
 	paragraphs = filterDirectoryList("paragraphs\\.paragraphs_type*")
 
+	mermaid = append(mermaid, "flowchart content_model\n")
+
 	handleContentTypes(contentTypes)
+	fmt.Println(mermaid)
+	os.Exit(0)
+
 	handleParagraphs(paragraphs)
 	handleTaxonomies(taxonomies)
 	handleViews(views)
@@ -51,6 +57,9 @@ func handleContentTypes(contentTypes []string) {
 	var fields []string
 	var fieldName string
 	var fieldType string
+	var shapeStart string
+	var shapeEnd string
+	var mermaidNode string
 
 	// Create the file
 	file, err := os.Create(*write_dir + "/content_types.csv")
@@ -114,10 +123,46 @@ func handleContentTypes(contentTypes []string) {
 			fieldType = fmt.Sprintf("%v", storageData["type"])
 			if storageData["type"].(string) == "entity_reference" {
 				storageSettings := storageData["settings"].(map[string]interface{})
+				targetType := storageSettings["target_type"]
 				if typeSettings, ok := typeData["settings"].(map[string]interface{}); ok {
 					if typeHandlerSettings, ok := typeSettings["handler_settings"].(map[string]interface{}); ok {
-						if targetBundles, ok := typeHandlerSettings["target_bundles"]; ok {
-							fieldType = fieldType + ", " + storageSettings["target_type"].(string) + " (" + fmt.Sprintf("%v", targetBundles) + ")"
+						switch typeSettings["handler"] {
+						case "default:taxonomy_term":
+							targetBundles := typeHandlerSettings["target_bundles"].(map[string]interface{})
+							for _, bundle := range targetBundles {
+								switch targetType {
+								case "taxonomy_term":
+									shapeStart = "{"
+									shapeEnd = "}"
+								case "node":
+									shapeStart = "["
+									shapeEnd = "]"
+								case "media":
+									shapeStart = "[["
+									shapeEnd = "]]"
+								}
+								mermaidNode = contentTypeName + "[" + contentTypeName + "] --> " + bundle.(string) + shapeStart + bundle.(string) + shapeEnd + "\n"
+								mermaid = append(mermaid, mermaidNode)
+								fieldType = fieldType + ", " + storageSettings["target_type"].(string) + " (" + fmt.Sprintf("%v", targetBundles) + ")"
+							}
+						case "default:node":
+							targetBundles := typeHandlerSettings["target_bundles"].(map[string]interface{})
+							for _, bundle := range targetBundles {
+								switch targetType {
+								case "taxonomy_term":
+									shapeStart = "{"
+									shapeEnd = "}"
+								case "node":
+									shapeStart = "["
+									shapeEnd = "]"
+								case "media":
+									shapeStart = "[["
+									shapeEnd = "]]"
+								}
+								mermaidNode = contentTypeName + "[" + contentTypeName + "] --> " + bundle.(string) + shapeStart + bundle.(string) + shapeEnd + "\n"
+								mermaid = append(mermaid, mermaidNode)
+								fieldType = fieldType + ", " + storageSettings["target_type"].(string) + " (" + fmt.Sprintf("%v", targetBundles) + ")"
+							}
 						}
 					}
 				}
