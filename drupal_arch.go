@@ -50,6 +50,7 @@ func handleContentTypes(contentTypes []string) {
 	var typeHeader = []string{"Label", "Machine Name", "Type", "Description", "Required", "Default Value", "Cardinality", "Translatable"}
 	var fields []string
 	var fieldName string
+	var fieldType string
 
 	// Create the file
 	file, err := os.Create(*write_dir + "/content_types.csv")
@@ -110,10 +111,24 @@ func handleContentTypes(contentTypes []string) {
 			}
 
 			// Write the row
-			record := []string{typeData["label"].(string), fieldName, storageData["type"].(string), typeData["description"].(string), fmt.Sprintf("%v", typeData["required"]), fmt.Sprintf("%v", typeData["default_value"]), cardinality, fmt.Sprintf("%v", typeData["translatable"])}
+			fieldType = fmt.Sprintf("%v", storageData["type"])
+			if storageData["type"].(string) == "entity_reference" {
+				storageSettings := storageData["settings"].(map[string]interface{})
+				if typeSettings, ok := typeData["settings"].(map[string]interface{}); ok {
+					if typeHandlerSettings, ok := typeSettings["handler_settings"].(map[string]interface{}); ok {
+						if targetBundles, ok := typeHandlerSettings["target_bundles"]; ok {
+							fieldType = fieldType + ", " + storageSettings["target_type"].(string) + " (" + fmt.Sprintf("%v", targetBundles) + ")"
+						}
+					}
+				}
+			}
+
+			record := []string{typeData["label"].(string), fieldName, fieldType, typeData["description"].(string), fmt.Sprintf("%v", typeData["required"]), fmt.Sprintf("%v", typeData["default_value"]), cardinality, fmt.Sprintf("%v", typeData["translatable"])}
 			err = typeWriter.Write(record)
 			checkError(err)
 		}
+
+		typeWriter.Flush()
 	}
 }
 
