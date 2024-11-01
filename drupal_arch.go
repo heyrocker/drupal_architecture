@@ -67,8 +67,9 @@ func handleContentTypes(contentTypes []string) {
 	// Iterate content types array
 	for _, contentTypeFile := range contentTypes {
 		// Write a record to the main content types file for this content type
+		fmt.Println(contentTypeFile)
 		configData := getConfigData(*read_dir + "/" + contentTypeFile)
-		record := []string{configData["name"].(string), configData["type"].(string), configData["description"].(string)}
+		record := []string{configData["name"].(string), configData["type"].(string), fmt.Sprintf("%v", configData["description"])}
 		err = writer.Write(record)
 		checkError(err)
 
@@ -207,7 +208,7 @@ func handleTaxonomies(taxonomies []string) {
 	for _, file := range taxonomies {
 		configData := getConfigData(*read_dir + "/" + file)
 
-		record := []string{configData["vid"].(string), configData["name"].(string), configData["description"].(string)}
+		record := []string{configData["vid"].(string), configData["name"].(string), fmt.Sprintf("%v", configData["description"])}
 
 		err = writer.Write(record)
 		checkError(err)
